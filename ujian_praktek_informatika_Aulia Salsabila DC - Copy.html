@@ -1,0 +1,2648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Peminjaman Barang - SMA Negeri 1 Tarakan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a237e;
+            --secondary: #ff5722;
+            --accent: #ffc107;
+            --success: #4caf50;
+            --info: #2196f3;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --purple: #9c27b0;
+            --teal: #009688;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            background: linear-gradient(135deg, #0d1440 0%, #1a237e 30%, #283593 70%, #3949ab 100%);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            animation: gradientShift 20s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Kursor khusus dengan efek neon */
+        .cursor-follower {
+            position: fixed;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.9);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.1s, background 0.3s;
+            box-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.8),
+                0 0 40px rgba(255, 215, 0, 0.4);
+            filter: blur(0.5px);
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.4);
+            pointer-events: none;
+            z-index: 9998;
+            mix-blend-mode: difference;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+        
+        /* Gelembung interaktif dengan efek neon */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 0 32px rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            overflow: hidden;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(10px) rotate(-5deg); }
+            75% { transform: translateY(-10px) rotate(3deg); }
+        }
+        
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .bubble:hover {
+            transform: scale(1.4) rotate(15deg) !important;
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.3),
+                inset 0 0 40px rgba(255, 255, 255, 0.25),
+                0 0 30px rgba(255, 255, 255, 0.4);
+        }
+        
+        .bubble:hover::before {
+            opacity: 1;
+        }
+        
+        .bubble.popped {
+            animation: popBubble 0.7s forwards;
+        }
+        
+        @keyframes popBubble {
+            0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+            50% { transform: scale(1.8); opacity: 0.7; filter: brightness(1.5); }
+            100% { transform: scale(0); opacity: 0; filter: brightness(0); }
+        }
+        
+        /* Header dengan efek glassmorphism dan neon */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.15),
+                0 5px 15px rgba(0, 0, 0, 0.08),
+                inset 0 0 1px rgba(255, 255, 255, 0.8);
+            border-bottom: 6px solid var(--accent);
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(15px);
+            border-radius: 0 0 25px 25px;
+            margin: 0 1rem;
+            margin-top: 1rem;
+        }
+        
+        .school-logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.25),
+                0 0 30px rgba(33, 150, 243, 0.5);
+            animation: floatLogo 4s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .school-logo::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: shineLogo 3s infinite linear;
+        }
+        
+        @keyframes shineLogo {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+        
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(3deg); }
+            75% { transform: translateY(-5px) rotate(-3deg); }
+        }
+        
+        .school-name {
+            color: var(--primary);
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .school-name::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 25%;
+            width: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+        
+        .system-title {
+            color: var(--secondary);
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(90deg, var(--secondary), #ff9800);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .student-count {
+            background: linear-gradient(135deg, var(--info), #0d47a1);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: 1rem;
+            box-shadow: 
+                0 8px 20px rgba(33, 150, 243, 0.4),
+                0 0 15px rgba(33, 150, 243, 0.6);
+            animation: pulseCount 3s infinite ease-in-out;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes pulseCount {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4), 0 0 15px rgba(33, 150, 243, 0.6); }
+            50% { transform: scale(1.08); box-shadow: 0 12px 30px rgba(33, 150, 243, 0.6), 0 0 25px rgba(33, 150, 243, 0.8); }
+        }
+        
+        /* Kontainer utama */
+        .container {
+            max-width: 1400px;
+            margin: 3rem auto;
+            padding: 0 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Kotak pembuat dengan efek 3D dan neon */
+        .creator-card {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--secondary), #ff9800, #ff5722);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 25px;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.35),
+                0 10px 25px rgba(0, 0, 0, 0.25),
+                0 0 30px rgba(255, 87, 34, 0.7);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            max-width: 350px;
+            text-align: center;
+            border: 3px solid gold;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            overflow: hidden;
+            animation: floatCreator 6s infinite ease-in-out;
+        }
+        
+        @keyframes floatCreator {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(1deg); }
+            66% { transform: translateY(5px) rotate(-1deg); }
+        }
+        
+        .creator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.8s;
+        }
+        
+        .creator-card:hover {
+            transform: translateY(-15px) scale(1.1) rotateY(15deg) !important;
+            box-shadow: 
+                0 30px 70px rgba(0, 0, 0, 0.5),
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                0 0 40px rgba(255, 87, 34, 0.9);
+        }
+        
+        .creator-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .creator-name {
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .creator-class {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .creator-contact {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.7rem;
+            border-radius: 15px;
+            margin-top: 0.8rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .creator-card:hover .creator-contact {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .creator-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+        }
+        
+        .creator-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .creator-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+        }
+        
+        /* Bagian peminjaman dengan efek glassmorphism */
+        .loan-section {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.18),
+                0 10px 25px rgba(0, 0, 0, 0.12),
+                inset 0 0 1px rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loan-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--info), var(--secondary), var(--accent));
+            background-size: 300% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 0% 0; }
+            100% { background-position: 300% 0; }
+        }
+        
+        .section-title {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.8rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+        
+        /* Item barang dengan efek hover 3D */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .item-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.8rem;
+            box-shadow: 
+                0 12px 25px rgba(0, 0, 0, 0.12),
+                0 5px 15px rgba(0, 0, 0, 0.08),
+                inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            text-align: center;
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            animation: cardAppear 0.6s ease-out backwards;
+        }
+        
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .item-card:nth-child(2) { animation-delay: 0.1s; }
+        .item-card:nth-child(3) { animation-delay: 0.2s; }
+        .item-card:nth-child(4) { animation-delay: 0.3s; }
+        .item-card:nth-child(5) { animation-delay: 0.4s; }
+        .item-card:nth-child(6) { animation-delay: 0.5s; }
+        .item-card:nth-child(n+7) { animation-delay: 0.6s; }
+        
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--info));
+            transform: scaleX(0);
+            transition: transform 0.5s;
+            transform-origin: left;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-15px) rotateX(8deg) scale(1.05);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.18),
+                0 15px 30px rgba(0, 0, 0, 0.14),
+                0 0 30px rgba(33, 150, 243, 0.3);
+            border-color: var(--success);
+        }
+        
+        .item-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .item-card.selected {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: var(--success);
+            transform: translateY(-8px);
+            box-shadow: 
+                0 20px 40px rgba(76, 175, 80, 0.2),
+                0 10px 20px rgba(76, 175, 80, 0.15),
+                0 0 25px rgba(76, 175, 80, 0.3);
+        }
+        
+        .item-card.selected::after {
+            content: '✓ TERPILIH';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--success);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.7rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: pulseSelected 2s infinite;
+        }
+        
+        @keyframes pulseSelected {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .item-icon {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2));
+            transition: transform 0.5s;
+        }
+        
+        .item-card:hover .item-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+        
+        /* Daftar pinjaman dengan efek scroll */
+        .loan-list {
+            background: var(--light);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2.5rem;
+            max-height: 450px;
+            overflow-y: auto;
+            box-shadow: 
+                inset 0 3px 15px rgba(0, 0, 0, 0.1),
+                inset 0 0 1px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .loan-list::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 95%, rgba(255,255,255,0.8));
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .loan-list::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .loan-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+        
+        .loan-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary), var(--info));
+            border-radius: 10px;
+            box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        }
+        
+        .loan-item {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.1),
+                0 3px 10px rgba(0, 0, 0, 0.08);
+            animation: slideIn 0.6s ease-out;
+            transition: all 0.4s;
+            border-left: 6px solid var(--info);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .loan-item:hover {
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            border-left-color: var(--secondary);
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.9); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        .remove-btn {
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .remove-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .remove-btn:hover {
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 8px 25px rgba(211, 47, 47, 0.6);
+        }
+        
+        .remove-btn:hover::before {
+            transform: translateX(100%);
+        }
+        
+        /* Panel kontak dengan efek 3D */
+        .contact-panel {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.18),
+                0 10px 25px rgba(0, 0, 0, 0.12),
+                inset 0 0 1px rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            height: fit-content;
+            position: sticky;
+            top: 3rem;
+            overflow: hidden;
+        }
+        
+        .contact-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent), var(--purple));
+            background-size: 300% 100%;
+            animation: shimmer 4s infinite linear;
+        }
+        
+        .contact-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            border-left: 8px solid var(--info);
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.15),
+                0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+        
+        .contact-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--info), #0d47a1);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: white;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.25),
+                0 0 25px rgba(33, 150, 243, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .contact-avatar::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shineAvatar 3s infinite linear;
+        }
+        
+        @keyframes shineAvatar {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+        
+        .contact-name {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.7rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-role {
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .contact-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        
+        .contact-action-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.4s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .contact-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.7s;
+        }
+        
+        .contact-action-btn:hover::before {
+            left: 100%;
+        }
+        
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+        }
+        
+        .whatsapp-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.5);
+        }
+        
+        .message-btn {
+            background: linear-gradient(135deg, var(--info), #0d47a1);
+            color: white;
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+        }
+        
+        .message-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(33, 150, 243, 0.5);
+        }
+        
+        /* Tutorial section dengan efek akordion */
+        .tutorial-section {
+            margin-top: 2.5rem;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.1),
+                inset 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tutorial-step {
+            background: white;
+            border-radius: 15px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.1),
+                0 3px 10px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tutorial-step::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 6px;
+            background: linear-gradient(var(--accent), var(--secondary));
+            transform: scaleY(0);
+            transition: transform 0.4s;
+            transform-origin: top;
+        }
+        
+        .tutorial-step:hover {
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tutorial-step:hover::before {
+            transform: scaleY(1);
+        }
+        
+        .step-number {
+            display: inline-flex;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1.5rem;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+        
+        /* Tombol aksi dengan efek hover */
+        .action-buttons {
+            display: flex;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .btn {
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.8s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--success), #2e7d32);
+            color: white;
+            box-shadow: 
+                0 12px 30px rgba(76, 175, 80, 0.4),
+                0 0 20px rgba(76, 175, 80, 0.5);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 
+                0 20px 40px rgba(76, 175, 80, 0.6),
+                0 0 30px rgba(76, 175, 80, 0.7);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), #e64a19);
+            color: white;
+            box-shadow: 
+                0 12px 30px rgba(255, 87, 34, 0.4),
+                0 0 20px rgba(255, 87, 34, 0.5);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 
+                0 20px 40px rgba(255, 87, 34, 0.6),
+                0 0 30px rgba(255, 87, 34, 0.7);
+        }
+        
+        .btn-tutorial {
+            background: linear-gradient(135deg, var(--purple), #7b1fa2);
+            color: white;
+            box-shadow: 
+                0 12px 30px rgba(156, 39, 176, 0.4),
+                0 0 20px rgba(156, 39, 176, 0.5);
+        }
+        
+        .btn-tutorial:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 
+                0 20px 40px rgba(156, 39, 176, 0.6),
+                0 0 30px rgba(156, 39, 176, 0.7);
+        }
+        
+        /* Notifikasi dengan animasi masuk */
+        .notification {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            background: var(--success);
+            color: white;
+            padding: 1.5rem 2.5rem;
+            border-radius: 15px;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.25),
+                0 8px 25px rgba(0, 0, 0, 0.2),
+                0 0 25px rgba(76, 175, 80, 0.5);
+            z-index: 1000;
+            transform: translateX(-100vw);
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-icon {
+            font-size: 2.2rem;
+        }
+        
+        /* Efek partikel canggih */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(1px);
+            box-shadow: 0 0 10px currentColor;
+        }
+        
+        /* Animasi untuk interaksi visual */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .shake-animation {
+            animation: shake 0.8s ease;
+        }
+        
+        .bounce-animation {
+            animation: bounce 1s infinite;
+        }
+        
+        /* Modal untuk tutorial detail */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.4),
+                0 0 50px rgba(255, 255, 255, 0.1);
+            animation: modalAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--info), var(--secondary), var(--accent));
+            background-size: 300% 100%;
+            animation: shimmer 3s infinite linear;
+            border-radius: 30px 30px 0 0;
+        }
+        
+        @keyframes modalAppear {
+            from { transform: scale(0.8) translateY(60px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2.5rem;
+            cursor: pointer;
+            color: var(--secondary);
+            transition: transform 0.4s;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-modal:hover {
+            transform: rotate(90deg);
+            background: rgba(255, 87, 34, 0.1);
+        }
+        
+        /* Responsif */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 900px;
+            }
+            
+            .contact-panel {
+                position: static;
+            }
+            
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1.5rem;
+            }
+            
+            .loan-section, .contact-panel {
+                padding: 2rem;
+            }
+            
+            .school-name {
+                font-size: 2rem;
+            }
+            
+            .system-title {
+                font-size: 1.6rem;
+            }
+            
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .creator-card {
+                max-width: 300px;
+                right: 20px;
+                bottom: 20px;
+                padding: 1.2rem;
+            }
+            
+            .contact-actions {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header {
+                padding: 1.5rem;
+                margin: 0 0.5rem;
+                margin-top: 0.5rem;
+            }
+            
+            .school-logo {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+            
+            .school-name {
+                font-size: 1.6rem;
+            }
+            
+            .system-title {
+                font-size: 1.3rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .loan-section, .contact-panel {
+                padding: 1.5rem;
+            }
+            
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .creator-card {
+                max-width: 260px;
+                right: 10px;
+                bottom: 10px;
+            }
+        }
+        
+        /* Feedback section */
+        .feedback-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+        }
+        
+        .feedback-content {
+            background: white;
+            border-radius: 25px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(255, 193, 7, 0.3);
+            animation: modalAppear 0.5s ease-out;
+            border: 2px solid var(--accent);
+            text-align: center;
+        }
+        
+        .feedback-content h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .feedback-content textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border-radius: 15px;
+            border: 2px solid #ddd;
+            resize: none;
+            font-family: 'Poppins', sans-serif;
+            margin: 1.5rem 0;
+            transition: border 0.3s;
+        }
+        
+        .feedback-content textarea:focus {
+            outline: none;
+            border-color: var(--info);
+        }
+        
+        .feedback-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .feedback-btn {
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .feedback-send {
+            background: linear-gradient(135deg, var(--success), #2e7d32);
+            color: white;
+        }
+        
+        .feedback-cancel {
+            background: linear-gradient(135deg, #757575, #424242);
+            color: white;
+        }
+        
+        .feedback-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* Live chat indicator */
+        .live-chat {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 
+                0 10px 30px rgba(37, 211, 102, 0.4),
+                0 0 20px rgba(37, 211, 102, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            z-index: 99;
+            animation: pulseGreen 2s infinite;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4), 0 0 20px rgba(37, 211, 102, 0.6); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6), 0 0 30px rgba(37, 211, 102, 0.8); }
+        }
+        
+        .live-chat:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Progress bar untuk peminjaman */
+        .loan-progress {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+        
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            width: 80%;
+            height: 4px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .step-circle.active {
+            background: var(--success);
+            transform: scale(1.2);
+        }
+        
+        .step-label {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Kursor khusus dengan trail -->
+    <div class="cursor-follower" id="cursorFollower"></div>
+    
+    <!-- Live chat indicator -->
+    <div class="live-chat" id="liveChat">
+        <i class="fab fa-whatsapp"></i>
+        <span>Chat dengan Pak Semin</span>
+    </div>
+    
+    <!-- Header -->
+    <header>
+        <div class="school-logo">
+            <i class="fas fa-school"></i>
+        </div>
+        <h1 class="school-name">
+            <span class="logo-animation">🏫</span> SMA NEGERI 1 TARAKAN
+        </h1>
+        <h2 class="system-title">SISTEM PEMINJAMAN BARANG SEKOLAH DIGITAL</h2>
+        <div class="student-count">
+            <i class="fas fa-users"></i> TOTAL SISWA: <span id="studentCount">400</span>
+        </div>
+    </header>
+    
+    <!-- Kontainer utama -->
+    <div class="container">
+        <!-- Bagian utama untuk peminjaman barang -->
+        <main class="loan-section">
+            <h2 class="section-title"><i class="fas fa-box-open"></i> DAFTAR BARANG YANG DAPAT DIPINJAM</h2>
+            
+            <div class="loan-progress">
+                <h3 style="margin-bottom: 1rem; color: var(--primary);">Proses Peminjaman Anda</h3>
+                <div class="progress-steps">
+                    <div class="progress-step">
+                        <div class="step-circle" id="step1">1</div>
+                        <div class="step-label">Pilih Barang</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step2">2</div>
+                        <div class="step-label">Daftar Pinjaman</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step3">3</div>
+                        <div class="step-label">Ajukan</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step4">4</div>
+                        <div class="step-label">Konfirmasi</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step5">5</div>
+                        <div class="step-label">Ambil Barang</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="items-grid" id="itemsGrid">
+                <!-- Item barang akan diisi oleh JavaScript -->
+            </div>
+            
+            <div class="loan-list-section">
+                <h3 class="section-title"><i class="fas fa-clipboard-list"></i> DAFTAR PEMINJAMAN ANDA</h3>
+                <div class="loan-list" id="loanList">
+                    <!-- Daftar pinjaman akan diisi oleh JavaScript -->
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="submitLoanBtn">
+                        <i class="fas fa-paper-plane"></i> Ajukan Peminjaman
+                    </button>
+                    <button class="btn btn-secondary" id="clearListBtn">
+                        <i class="fas fa-trash-alt"></i> Hapus Semua
+                    </button>
+                    <button class="btn btn-tutorial" id="tutorialBtn">
+                        <i class="fas fa-graduation-cap"></i> Tutorial Lengkap
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Panel kontak dan informasi -->
+        <aside class="contact-panel">
+            <h2 class="section-title"><i class="fas fa-address-card"></i> KONTAK PEMINJAMAN</h2>
+            
+            <div class="contact-card">
+                <div class="contact-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="contact-name">PAK SEMIN, S.Ag</div>
+                <div class="contact-role">Penanggung Jawab Peminjaman Barang</div>
+                <div class="contact-role" style="margin-bottom: 0.5rem;">📞 Hubungi untuk peminjaman:</div>
+                
+                <div style="font-size: 1.3rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">
+                    <i class="fas fa-phone"></i> +62 812-2509-7240
+                </div>
+                
+                <div class="contact-actions">
+                    <button class="contact-action-btn whatsapp-btn" id="whatsappBtn">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button class="contact-action-btn message-btn" id="smsBtn">
+                        <i class="fas fa-sms"></i> SMS
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tutorial-section">
+                <h3 class="section-title"><i class="fas fa-info-circle"></i> TUTORIAL CEPAT</h3>
+                
+                <div class="tutorial-step" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">Pilih barang yang ingin dipinjam dengan mengkliknya</div>
+                </div>
+                
+                <div class="tutorial-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">Barang akan otomatis masuk ke daftar pinjaman</div>
+                </div>
+                
+                <div class="tutorial-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">Klik "Ajukan Peminjaman" untuk mengirim permintaan</div>
+                </div>
+                
+                <div class="tutorial-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-content">Hubungi Pak Semin untuk konfirmasi via WhatsApp/SMS</div>
+                </div>
+                
+                <div class="tutorial-step" data-step="5">
+                    <div class="step-number">5</div>
+                    <div class="step-content">Ambil barang di ruang TU dengan menunjukkan KTM</div>
+                </div>
+            </div>
+            
+            <div class="contact-card">
+                <h3 class="section-title"><i class="fas fa-chart-line"></i> STATISTIK REAL-TIME</h3>
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.8rem; color: var(--success); font-weight: bold;" id="loanCount">0</div>
+                    <div style="color: #666; font-size: 1.1rem;">Peminjaman hari ini</div>
+                    
+                    <div style="display: flex; justify-content: space-around; margin-top: 2rem;">
+                        <div>
+                            <div style="font-size: 2.2rem; color: var(--info); font-weight: bold;" id="availableItems">30</div>
+                            <div style="color: #666; font-size: 0.9rem;">Barang Tersedia</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.2rem; color: var(--secondary); font-weight: bold;" id="totalLoans">156</div>
+                            <div style="color: #666; font-size: 0.9rem;">Total Peminjaman</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- Kotak pembuat -->
+    <div class="creator-card" id="creatorCard">
+        <div class="creator-name">AULIA SALSABILA DIKPA CAHYADI</div>
+        <div class="creator-class">KELAS XII - I | SMA NEGERI 1 TARAKAN</div>
+        <div class="creator-contact">
+            <i class="fas fa-phone-alt"></i> (+62) 821-5535-0053
+        </div>
+        <div class="creator-actions">
+            <button class="creator-btn" id="thankCreator">
+                <i class="fas fa-heart"></i> Terima Kasih
+            </button>
+            <button class="creator-btn" id="contactCreator">
+                <i class="fas fa-comment"></i> Hubungi
+            </button>
+        </div>
+        <div style="margin-top: 0.8rem; font-size: 0.9rem; opacity: 0.9;">
+            <i class="fas fa-mouse-pointer"></i> Klik untuk interaksi
+        </div>
+    </div>
+    
+    <!-- Notifikasi -->
+    <div class="notification" id="notification">
+        <div class="notification-icon" id="notificationIcon"></div>
+        <div id="notificationMessage"></div>
+    </div>
+    
+    <!-- Modal tutorial -->
+    <div class="modal" id="tutorialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="color: var(--primary);">📚 Tutorial Lengkap Peminjaman Barang</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: var(--secondary); margin-bottom: 1.5rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem;">Langkah-langkah Lengkap Peminjaman:</h3>
+                
+                <div style="margin-bottom: 1.8rem; padding: 1.5rem; background: #f0f7ff; border-radius: 15px; border-left: 5px solid var(--info);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;"><span style="background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">1</span> Memilih Barang</h4>
+                    <p>Klik pada kartu barang yang ingin dipinjam. Barang yang dipilih akan berubah warna dan muncul tanda centang. Anda bisa memilih lebih dari satu barang.</p>
+                </div>
+                
+                <div style="margin-bottom: 1.8rem; padding: 1.5rem; background: #f0f7ff; border-radius: 15px; border-left: 5px solid var(--info);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;"><span style="background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</span> Mengelola Daftar Pinjaman</h4>
+                    <p>Semua barang yang dipilih akan muncul di daftar pinjaman. Anda bisa menghapus barang dengan mengklik tombol X di sampingnya. Gunakan tombol "Hapus Semua" untuk mengosongkan daftar.</p>
+                </div>
+                
+                <div style="margin-bottom: 1.8rem; padding: 1.5rem; background: #f0f7ff; border-radius: 15px; border-left: 5px solid var(--info);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;"><span style="background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</span> Mengajukan Peminjaman</h4>
+                    <p>Setelah memilih barang, klik tombol "Ajukan Peminjaman". Sistem akan mencatat permintaan Anda dan menampilkan notifikasi konfirmasi.</p>
+                </div>
+                
+                <div style="margin-bottom: 1.8rem; padding: 1.5rem; background: #f0f7ff; border-radius: 15px; border-left: 5px solid var(--info);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;"><span style="background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">4</span> Konfirmasi ke Petugas</h4>
+                    <p>Hubungi Pak Semin via WhatsApp atau SMS di <strong>+62 812-2509-7240</strong> untuk konfirmasi peminjaman. Siapkan data diri (nama, kelas, NIS) dan tujuan peminjaman.</p>
+                </div>
+                
+                <div style="margin-bottom: 1.8rem; padding: 1.5rem; background: #f0f7ff; border-radius: 15px; border-left: 5px solid var(--info);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;"><span style="background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">5</span> Pengambilan Barang</h5>
+                    <p>Datang ke ruang TU dengan membawa KTM. Barang dapat diambil setelah konfirmasi dari Pak Semin. Tunjukkan KTM kepada petugas saat mengambil barang.</p>
+                </div>
+                
+                <div style="margin-bottom: 1.8rem; padding: 1.5rem; background: #fff8e1; border-radius: 15px; border-left: 5px solid var(--accent);">
+                    <h4 style="color: var(--secondary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;"><i class="fas fa-exclamation-circle"></i> Ketentuan Peminjaman:</h4>
+                    <ul style="padding-left: 1.5rem;">
+                        <li style="margin-bottom: 0.5rem;">Peminjaman maksimal 7 hari kerja</li>
+                        <li style="margin-bottom: 0.5rem;">Barang harus dikembalikan dalam kondisi baik</li>
+                        <li style="margin-bottom: 0.5rem;">Denda keterlambatan: Rp 5.000/hari untuk barang elektronik, Rp 2.000/hari untuk barang lainnya</li>
+                        <li style="margin-bottom: 0.5rem;">Kerusakan barang menjadi tanggung jawab peminjam</li>
+                        <li>Peminjaman untuk kepentingan kegiatan sekolah</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feedback modal -->
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="feedback-content">
+            <h2><i class="fas fa-heart"></i> Kirim Pesan Terima Kasih</h2>
+            <p>Kirim pesan terima kasih kepada pembuat website:</p>
+            <textarea id="feedbackMessage" placeholder="Tulis pesan terima kasih Anda di sini..."></textarea>
+            <div class="feedback-buttons">
+                <button class="feedback-btn feedback-send" id="sendFeedback">Kirim Pesan</button>
+                <button class="feedback-btn feedback-cancel" id="cancelFeedback">Batal</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Data barang yang dapat dipinjam
+        const items = [
+            { id: 1, name: "Meja Guru", icon: "🪑", category: "Perabot", stock: 15, popularity: 8 },
+            { id: 2, name: "Kursi Siswa", icon: "💺", category: "Perabot", stock: 120, popularity: 9 },
+            { id: 3, name: "P3K Lengkap", icon: "🩹", category: "Kesehatan", stock: 8, popularity: 7 },
+            { id: 4, name: "Sound System", icon: "🔊", category: "Elektronik", stock: 3, popularity: 9 },
+            { id: 5, name: "Sapu", icon: "🧹", category: "Kebersihan", stock: 25, popularity: 6 },
+            { id: 6, name: "Serokan", icon: "🥄", category: "Kebersihan", stock: 12, popularity: 5 },
+            { id: 7, name: "Komputer Lab", icon: "💻", category: "Elektronik", stock: 40, popularity: 9 },
+            { id: 8, name: "Toa/Megafon", icon: "📢", category: "Elektronik", stock: 5, popularity: 7 },
+            { id: 9, name: "Tripod Kamera", icon: "📸", category: "Fotografi", stock: 4, popularity: 6 },
+            { id: 10, name: "Terminal Listrik", icon: "🔌", category: "Elektronik", stock: 10, popularity: 5 },
+            { id: 11, name: "Pompa Balon", icon: "🎈", category: "Dekorasi", stock: 6, popularity: 4 },
+            { id: 12, name: "Proyektor", icon: "📽️", category: "Elektronik", stock: 8, popularity: 9 },
+            { id: 13, name: "Papan Tulis", icon: "📋", category: "Perlengkapan", stock: 20, popularity: 6 },
+            { id: 14, name: "Mikrofon Wireless", icon: "🎤", category: "Elektronik", stock: 7, popularity: 8 },
+            { id: 15, name: "Kabel Extension", icon: "🔌", category: "Elektronik", stock: 15, popularity: 5 },
+            { id: 16, name: "Tenda Sekolah", icon: "⛺", category: "Outdoor", stock: 3, popularity: 7 },
+            { id: 17, name: "Kipas Angin", icon: "🌀", category: "Elektronik", stock: 12, popularity: 6 },
+            { id: 18, name: "Papan Nama", icon: "🏷️", category: "Dekorasi", stock: 20, popularity: 4 },
+            { id: 19, name: "Kamera DSLR", icon: "📷", category: "Fotografi", stock: 2, popularity: 8 },
+            { id: 20, name: "Laptop Sekolah", icon: "💻", category: "Elektronik", stock: 10, popularity: 9 },
+            { id: 21, name: "Printer", icon: "🖨️", category: "Elektronik", stock: 6, popularity: 7 },
+            { id: 22, name: "Karpet Aula", icon: "🧶", category: "Dekorasi", stock: 8, popularity: 5 },
+            { id: 23, name: "Panggung Portable", icon: "🎪", category: "Dekorasi", stock: 2, popularity: 6 },
+            { id: 24, name: "Kotak Amal", icon: "🤲", category: "Dana", stock: 5, popularity: 3 },
+            { id: 25, name: "Speaker Portable", icon: "🔈", category: "Elektronik", stock: 9, popularity: 7 },
+            { id: 26, name: "Papan Catur", icon: "♟️", category: "Olahraga", stock: 4, popularity: 4 },
+            { id: 27, name: "Alat Lab IPA", icon: "🧪", category: "Pendidikan", stock: 15, popularity: 6 },
+            { id: 28, name: "Whiteboard", icon: "🖊️", category: "Perlengkapan", stock: 12, popularity: 6 },
+            { id: 29, name: "Kursi Roda", icon: "🦽", category: "Kesehatan", stock: 2, popularity: 5 },
+            { id: 30, name: "Papan Pengumuman", icon: "📌", category: "Administrasi", stock: 10, popularity: 4 }
+        ];
+        
+        // Data untuk gelembung interaktif
+        const bubbleContents = [
+            { icon: "🏫", message: "Selamat datang di SMA Negeri 1 Tarakan!" },
+            { icon: "📚", message: "Peminjaman barang maksimal 7 hari" },
+            { icon: "🎓", message: "Jumlah siswa: 400 orang" },
+            { icon: "✏️", message: "Barang harus dikembalikan dalam kondisi baik" },
+            { icon: "🔔", message: "Hubungi Pak Semin untuk konfirmasi" },
+            { icon: "🏆", message: "SMA Negeri 1 Tarakan - Sekolah Unggulan" },
+            { icon: "🎨", message: "Hapus barang dari daftar dengan klik X" },
+            { icon: "⚽", message: "Denda berlaku untuk keterlambatan pengembalian" },
+            { icon: "🎭", message: "Klik gelembung untuk pesan acak!" },
+            { icon: "🔬", message: "Periksa ketersediaan barang sebelum meminjam" },
+            { icon: "💡", message: "Gunakan sistem ini untuk kemudahan peminjaman" },
+            { icon: "🎪", message: "Total 30 jenis barang dapat dipinjam" },
+            { icon: "📢", message: "Nomor kontak Pak Semin: 0812-2509-7240" },
+            { icon: "🖥️", message: "Aplikasi dibuat oleh Aulia Salsabila Dikpa Cahyadi" },
+            { icon: "🔧", message: "Klik tutorial untuk panduan lengkap" },
+            { icon: "❤️", message: "Kirim pesan terima kasih ke pembuat website!" },
+            { icon: "💬", message: "Chat dengan Pak Semin via WhatsApp" },
+            { icon: "📱", message: "Bisa juga kirim SMS ke Pak Semin" }
+        ];
+        
+        // State aplikasi
+        let selectedItems = [];
+        let loanCount = Math.floor(Math.random() * 25) + 12; // Simulasi jumlah peminjaman
+        let totalLoans = Math.floor(Math.random() * 300) + 150; // Simulasi total peminjaman
+        let cursorTrails = [];
+        let bubbleElements = [];
+        let studentCount = 400;
+        
+        // Elemen DOM
+        const itemsGrid = document.getElementById('itemsGrid');
+        const loanList = document.getElementById('loanList');
+        const submitLoanBtn = document.getElementById('submitLoanBtn');
+        const clearListBtn = document.getElementById('clearListBtn');
+        const cursorFollower = document.getElementById('cursorFollower');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const creatorCard = document.getElementById('creatorCard');
+        const loanCountElement = document.getElementById('loanCount');
+        const availableItemsElement = document.getElementById('availableItems');
+        const totalLoansElement = document.getElementById('totalLoans');
+        const tutorialBtn = document.getElementById('tutorialBtn');
+        const tutorialModal = document.getElementById('tutorialModal');
+        const closeModal = document.getElementById('closeModal');
+        const whatsappBtn = document.getElementById('whatsappBtn');
+        const smsBtn = document.getElementById('smsBtn');
+        const liveChat = document.getElementById('liveChat');
+        const thankCreatorBtn = document.getElementById('thankCreator');
+        const contactCreatorBtn = document.getElementById('contactCreator');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const sendFeedbackBtn = document.getElementById('sendFeedback');
+        const cancelFeedbackBtn = document.getElementById('cancelFeedback');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const studentCountElement = document.getElementById('studentCount');
+        const stepCircles = [
+            document.getElementById('step1'),
+            document.getElementById('step2'),
+            document.getElementById('step3'),
+            document.getElementById('step4'),
+            document.getElementById('step5')
+        ];
+        
+        // Inisialisasi aplikasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render daftar barang
+            renderItems();
+            
+            // Update statistik
+            updateStatistics();
+            
+            // Setup gelembung interaktif
+            createBubbles();
+            
+            // Setup partikel canggih
+            createAdvancedParticles();
+            
+            // Setup kursor dengan trail
+            setupCursorWithTrail();
+            
+            // Setup tutorial steps
+            setupTutorialSteps();
+            
+            // Setup progress steps
+            updateProgressSteps();
+            
+            // Setup event listener
+            setupEventListeners();
+            
+            // Tampilkan notifikasi selamat datang
+            showNotification("Selamat datang di Sistem Peminjaman Barang SMA Negeri 1 Tarakan!", "🏫", "info");
+            
+            // Auto-show tutorial setelah beberapa detik
+            setTimeout(() => {
+                showNotification("Klik tombol Tutorial untuk panduan lengkap peminjaman!", "📚", "info");
+            }, 3000);
+            
+            // Update student count animation
+            animateStudentCount();
+        });
+        
+        // Animasi hitungan siswa
+        function animateStudentCount() {
+            let count = 0;
+            const target = studentCount;
+            const duration = 3000; // 3 detik
+            const increment = target / (duration / 50);
+            
+            const timer = setInterval(() => {
+                count += increment;
+                if (count >= target) {
+                    count = target;
+                    clearInterval(timer);
+                }
+                studentCountElement.textContent = Math.floor(count);
+            }, 50);
+        }
+        
+        // Render daftar barang
+        function renderItems() {
+            itemsGrid.innerHTML = '';
+            
+            // Urutkan berdasarkan popularitas
+            const sortedItems = [...items].sort((a, b) => b.popularity - a.popularity);
+            
+            sortedItems.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.dataset.id = item.id;
+                
+                // Efek stok hampir habis
+                const stockStatus = item.stock <= 3 ? " (Stok Terbatas)" : "";
+                const stockClass = item.stock <= 3 ? "stock-low" : "";
+                const popularityStars = "★".repeat(item.popularity) + "☆".repeat(10 - item.popularity);
+                
+                itemCard.innerHTML = `
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name" style="font-weight: bold; margin-bottom: 0.3rem; font-size: 1.2rem;">${item.name}</div>
+                    <div class="item-category" style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">${item.category}</div>
+                    <div class="item-stock ${stockClass}" style="font-size: 0.9rem; color: ${item.stock <= 3 ? '#ff5722' : '#4caf50'}; margin-bottom: 0.5rem;">
+                        <i class="fas fa-box"></i> Tersedia: <strong>${item.stock}</strong>${stockStatus}
+                    </div>
+                    <div style="font-size: 0.8rem; color: #ff9800; margin-top: 0.5rem;">
+                        ${popularityStars}
+                    </div>
+                `;
+                
+                itemCard.addEventListener('click', () => toggleItemSelection(item.id));
+                
+                // Efek hover suara (simulasi)
+                itemCard.addEventListener('mouseenter', function() {
+                    this.classList.add('pulse-animation');
+                    // Efek visual saat hover
+                    createRippleEffect(this, item.icon);
+                });
+                
+                itemCard.addEventListener('mouseleave', function() {
+                    this.classList.remove('pulse-animation');
+                });
+                
+                itemsGrid.appendChild(itemCard);
+            });
+            
+            // Update jumlah barang tersedia
+            updateAvailableItemsCount();
+        }
+        
+        // Efek ripple saat klik item
+        function createRippleEffect(element, icon) {
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.width = '0px';
+            ripple.style.height = '0px';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 215, 0, 0.4)';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.top = '50%';
+            ripple.style.left = '50%';
+            ripple.style.zIndex = '1';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.6)';
+            
+            element.style.position = 'relative';
+            element.appendChild(ripple);
+            
+            // Animasi ripple
+            const animation = ripple.animate([
+                { width: '0px', height: '0px', opacity: 1 },
+                { width: '250px', height: '250px', opacity: 0 }
+            ], {
+                duration: 1000,
+                easing: 'ease-out'
+            });
+            
+            animation.onfinish = () => {
+                ripple.remove();
+            };
+        }
+        
+        // Update progress steps
+        function updateProgressSteps() {
+            // Reset semua step
+            stepCircles.forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Aktifkan step berdasarkan kondisi
+            if (selectedItems.length > 0) {
+                stepCircles[0].classList.add('active'); // Step 1: Pilih Barang
+                stepCircles[1].classList.add('active'); // Step 2: Daftar Pinjaman
+            }
+            
+            // Step 3 akan aktif saat tombol submit diklik (ditangani di fungsi submit)
+            // Step 4 akan aktif saat WhatsApp/SMS diklik (ditangani di fungsi terkait)
+            // Step 5 tidak diaktifkan karena perlu konfirmasi langsung
+        }
+        
+        // Toggle seleksi item
+        function toggleItemSelection(itemId) {
+            const itemIndex = selectedItems.findIndex(item => item.id === itemId);
+            const itemCard = document.querySelector(`.item-card[data-id="${itemId}"]`);
+            const item = items.find(item => item.id === itemId);
+            
+            // Cek stok
+            if (item.stock <= 0 && itemIndex === -1) {
+                showNotification(`Maaf, stok ${item.name} sudah habis!`, "❌", "warning");
+                itemCard.classList.add('shake-animation');
+                setTimeout(() => {
+                    itemCard.classList.remove('shake-animation');
+                }, 800);
+                return;
+            }
+            
+            if (itemIndex === -1) {
+                // Tambahkan item
+                selectedItems.push({...item});
+                itemCard.classList.add('selected');
+                
+                // Efek visual dengan animasi
+                itemCard.style.transform = 'scale(0.95) rotateY(15deg)';
+                setTimeout(() => {
+                    itemCard.style.transform = '';
+                }, 400);
+                
+                // Kurangi stok sementara
+                item.stock -= 1;
+                updateAvailableItemsCount();
+                
+                // Update tampilan stok item
+                updateItemStockDisplay(itemId);
+                
+                // Tampilkan notifikasi
+                showNotification(`${item.name} ditambahkan ke daftar pinjaman`, "✅", "success");
+                
+                // Efek suara (simulasi dengan visual)
+                createConfettiEffect(itemCard);
+                
+                // Update progress steps
+                updateProgressSteps();
+            } else {
+                // Hapus item
+                const removedItem = selectedItems[itemIndex];
+                selectedItems.splice(itemIndex, 1);
+                itemCard.classList.remove('selected');
+                
+                // Kembalikan stok
+                item.stock += 1;
+                updateAvailableItemsCount();
+                
+                // Update tampilan stok item
+                updateItemStockDisplay(itemId);
+                
+                // Tampilkan notifikasi
+                showNotification(`${removedItem.name} dihapus dari daftar pinjaman`, "↩️", "warning");
+                
+                // Update progress steps
+                updateProgressSteps();
+            }
+            
+            updateLoanList();
+        }
+        
+        // Update tampilan stok item
+        function updateItemStockDisplay(itemId) {
+            const item = items.find(item => item.id === itemId);
+            const itemCard = document.querySelector(`.item-card[data-id="${itemId}"] .item-stock`);
+            
+            if (itemCard) {
+                const stockStatus = item.stock <= 3 ? " (Stok Terbatas)" : "";
+                itemCard.innerHTML = `<i class="fas fa-box"></i> Tersedia: <strong>${item.stock}</strong>${stockStatus}`;
+                itemCard.style.color = item.stock <= 3 ? '#ff5722' : '#4caf50';
+            }
+        }
+        
+        // Update daftar pinjaman
+        function updateLoanList() {
+            loanList.innerHTML = '';
+            
+            if (selectedItems.length === 0) {
+                loanList.innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 4rem 1rem;">
+                        <div style="font-size: 4.5rem; margin-bottom: 1.5rem; opacity: 0.5;">📦</div>
+                        <div style="font-size: 1.3rem; margin-bottom: 0.8rem; font-weight: 500;">Daftar pinjaman kosong</div>
+                        <div style="font-size: 1rem; opacity: 0.7;">Klik pada barang di atas untuk menambahkannya ke daftar pinjaman</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            selectedItems.forEach((item, index) => {
+                const loanItem = document.createElement('div');
+                loanItem.className = 'loan-item';
+                
+                loanItem.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 1.2rem;">
+                        <div style="font-size: 2.2rem;">${item.icon}</div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 1.2rem;">${item.name}</div>
+                            <div style="font-size: 0.9rem; color: #666;">${item.category}</div>
+                            <div style="font-size: 0.8rem; color: #888; margin-top: 0.3rem;">
+                                <i class="fas fa-star" style="color: #ff9800;"></i> Popularitas: ${item.popularity}/10
+                            </div>
+                        </div>
+                    </div>
+                    <button class="remove-btn" data-index="${index}" title="Hapus dari daftar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                loanList.appendChild(loanItem);
+            });
+            
+            // Tambahkan event listener untuk tombol hapus
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    removeItemFromList(index);
+                });
+            });
+        }
+        
+        // Hapus item dari daftar
+        function removeItemFromList(index) {
+            const removedItem = selectedItems[index];
+            
+            // Kembalikan stok
+            const item = items.find(item => item.id === removedItem.id);
+            if (item) {
+                item.stock += 1;
+                updateAvailableItemsCount();
+                updateItemStockDisplay(item.id);
+            }
+            
+            selectedItems.splice(index, 1);
+            
+            // Update tampilan item card
+            const itemCard = document.querySelector(`.item-card[data-id="${removedItem.id}"]`);
+            if (itemCard) {
+                itemCard.classList.remove('selected');
+            }
+            
+            updateLoanList();
+            showNotification(`${removedItem.name} dihapus dari daftar pinjaman`, "↩️", "warning");
+            
+            // Update progress steps
+            updateProgressSteps();
+        }
+        
+        // Update statistik
+        function updateStatistics() {
+            loanCountElement.textContent = loanCount;
+            totalLoansElement.textContent = totalLoans;
+        }
+        
+        // Update jumlah barang tersedia
+        function updateAvailableItemsCount() {
+            const totalStock = items.reduce((sum, item) => sum + item.stock, 0);
+            availableItemsElement.textContent = totalStock;
+        }
+        
+        // Buat gelembung interaktif
+        function createBubbles() {
+            const bubbleCount = 25;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                
+                // Ukuran acak
+                const size = Math.floor(Math.random() * 80) + 50;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Posisi acak
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.top = `${Math.random() * 100}vh`;
+                
+                // Animasi delay acak
+                bubble.style.animationDelay = `${Math.random() * 20}s`;
+                
+                // Konten acak
+                const contentIndex = Math.floor(Math.random() * bubbleContents.length);
+                bubble.textContent = bubbleContents[contentIndex].icon;
+                bubble.dataset.message = bubbleContents[contentIndex].message;
+                
+                // Efek klik
+                bubble.addEventListener('click', function() {
+                    const colors = ['#FF5252', '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#00BCD4', '#8BC34A'];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    this.style.background = `linear-gradient(135deg, ${randomColor}, ${randomColor}80)`;
+                    this.style.transform = 'scale(1.8) rotate(360deg)';
+                    this.style.boxShadow = `0 0 40px ${randomColor}, inset 0 0 30px rgba(255,255,255,0.5)`;
+                    
+                    // Tampilkan pesan
+                    showNotification(this.dataset.message, this.textContent, "info");
+                    
+                    // Efek ledakan partikel
+                    createBubbleParticles(this);
+                    
+                    // Kembali ke keadaan semula setelah beberapa saat
+                    setTimeout(() => {
+                        this.style.background = '';
+                        this.style.transform = '';
+                        this.style.boxShadow = '';
+                    }, 600);
+                });
+                
+                document.body.appendChild(bubble);
+                bubbleElements.push(bubble);
+            }
+        }
+        
+        // Efek partikel saat gelembung diklik
+        function createBubbleParticles(bubble) {
+            const particleCount = 20;
+            const rect = bubble.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const color = getComputedStyle(bubble).background;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = '15px';
+                particle.style.height = '15px';
+                particle.style.borderRadius = '50%';
+                particle.style.background = color;
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+                particle.style.zIndex = '999';
+                particle.style.pointerEvents = 'none';
+                particle.style.boxShadow = '0 0 15px currentColor';
+                
+                document.body.appendChild(particle);
+                
+                // Animasi partikel
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 120 + 80;
+                const duration = Math.random() * 1200 + 800;
+                
+                particle.animate([
+                    { 
+                        transform: 'translate(0, 0) scale(1) rotate(0deg)', 
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0) rotate(360deg)`, 
+                        opacity: 0 
+                    }
+                ], {
+                    duration: duration,
+                    easing: 'ease-out'
+                }).onfinish = () => {
+                    particle.remove();
+                };
+            }
+        }
+        
+        // Buat partikel canggih
+        function createAdvancedParticles() {
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Ukuran, posisi dan warna acak
+                const size = Math.random() * 20 + 5;
+                const colors = [
+                    'rgba(255, 215, 0, 0.6)', 'rgba(33, 150, 243, 0.6)', 
+                    'rgba(76, 175, 80, 0.6)', 'rgba(255, 87, 34, 0.6)',
+                    'rgba(156, 39, 176, 0.6)', 'rgba(255, 193, 7, 0.6)',
+                    'rgba(0, 188, 212, 0.6)', 'rgba(139, 195, 74, 0.6)'
+                ];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = randomColor;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.boxShadow = `0 0 ${size * 2}px ${randomColor}`;
+                
+                // Animasi
+                animateAdvancedParticle(particle);
+                
+                document.body.appendChild(particle);
+            }
+        }
+        
+        // Animasikan partikel canggih
+        function animateAdvancedParticle(particle) {
+            let x = parseFloat(particle.style.left);
+            let y = parseFloat(particle.style.top);
+            let speed = Math.random() * 0.7 + 0.1;
+            let angle = Math.random() * Math.PI * 2;
+            let rotation = 0;
+            let scale = 1;
+            let scaleDirection = 0.008;
+            let opacity = 0.6;
+            let opacityDirection = 0.005;
+            
+            function moveParticle() {
+                // Gerakan
+                x += Math.cos(angle) * speed;
+                y += Math.sin(angle) * speed;
+                
+                // Rotasi
+                rotation += 1.5;
+                particle.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+                
+                // Efek pulsasi
+                scale += scaleDirection;
+                if (scale > 1.3 || scale < 0.7) scaleDirection = -scaleDirection;
+                
+                // Efek fade in/out
+                opacity += opacityDirection;
+                if (opacity > 0.8 || opacity < 0.3) opacityDirection = -opacityDirection;
+                particle.style.opacity = opacity;
+                
+                // Kembali ke area layar jika keluar
+                if (x < -5) x = 100;
+                if (x > 100) x = 0;
+                if (y < -5) y = 100;
+                if (y > 100) y = 0;
+                
+                particle.style.left = `${x}vw`;
+                particle.style.top = `${y}vh`;
+                
+                requestAnimationFrame(moveParticle);
+            }
+            
+            moveParticle();
+        }
+        
+        // Setup kursor dengan trail
+        function setupCursorWithTrail() {
+            let mouseX = 0;
+            let mouseY = 0;
+            let followerX = 0;
+            let followerY = 0;
+            let trailCount = 10;
+            
+            // Inisialisasi trail
+            for (let i = 0; i < trailCount; i++) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.opacity = 1 - (i / trailCount);
+                trail.style.width = `${15 - i}px`;
+                trail.style.height = `${15 - i}px`;
+                document.body.appendChild(trail);
+                cursorTrails.push({ element: trail, x: mouseX, y: mouseY });
+            }
+            
+            document.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            function animateCursor() {
+                // Update kursor utama
+                followerX += (mouseX - followerX) * 0.12;
+                followerY += (mouseY - followerY) * 0.12;
+                
+                cursorFollower.style.left = `${followerX - 12}px`;
+                cursorFollower.style.top = `${followerY - 12}px`;
+                
+                // Update trail
+                cursorTrails[0].x = followerX;
+                cursorTrails[0].y = followerY;
+                
+                for (let i = trailCount - 1; i > 0; i--) {
+                    cursorTrails[i].x += (cursorTrails[i-1].x - cursorTrails[i].x) * 0.25;
+                    cursorTrails[i].y += (cursorTrails[i-1].y - cursorTrails[i].y) * 0.25;
+                    
+                    cursorTrails[i].element.style.left = `${cursorTrails[i].x - (15 - i)/2}px`;
+                    cursorTrails[i].element.style.top = `${cursorTrails[i].y - (15 - i)/2}px`;
+                }
+                
+                // Ubah ukuran dan warna saat di atas elemen interaktif
+                const hoveredElement = document.elementFromPoint(mouseX, mouseY);
+                if (hoveredElement && (hoveredElement.tagName === 'BUTTON' || 
+                    hoveredElement.classList.contains('item-card') || 
+                    hoveredElement.classList.contains('bubble') ||
+                    hoveredElement.classList.contains('contact-number') ||
+                    hoveredElement.classList.contains('tutorial-step') ||
+                    hoveredElement.classList.contains('contact-action-btn') ||
+                    hoveredElement.classList.contains('creator-btn') ||
+                    hoveredElement.id === 'creatorCard' ||
+                    hoveredElement.id === 'liveChat')) {
+                    cursorFollower.style.transform = 'scale(2)';
+                    cursorFollower.style.background = 'rgba(255, 215, 0, 1)';
+                    cursorFollower.style.boxShadow = '0 0 30px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.8)';
+                } else {
+                    cursorFollower.style.transform = 'scale(1)';
+                    cursorFollower.style.background = 'rgba(255, 215, 0, 0.9)';
+                    cursorFollower.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4)';
+                }
+                
+                requestAnimationFrame(animateCursor);
+            }
+            
+            animateCursor();
+        }
+        
+        // Setup tutorial steps
+        function setupTutorialSteps() {
+            document.querySelectorAll('.tutorial-step').forEach(step => {
+                step.addEventListener('click', function() {
+                    const stepNum = this.dataset.step;
+                    const messages = [
+                        "Klik pada gambar barang untuk memilihnya",
+                        "Barang yang dipilih akan muncul di daftar pinjaman",
+                        "Klik 'Ajukan Peminjaman' untuk mengirim permintaan",
+                        "Hubungi Pak Semin di 0812-2509-7240 untuk konfirmasi via WhatsApp atau SMS",
+                        "Ambil barang di ruang TU dengan menunjukkan KTM"
+                    ];
+                    
+                    showNotification(`Langkah ${stepNum}: ${messages[stepNum-1]}`, "📘", "info");
+                    
+                    // Efek visual
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 300);
+                    
+                    // Update progress steps
+                    stepCircles.forEach((circle, index) => {
+                        if (index < stepNum) {
+                            circle.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+        
+        // Setup event listener
+        function setupEventListeners() {
+            // Tombol ajukan peminjaman
+            submitLoanBtn.addEventListener('click', function() {
+                if (selectedItems.length === 0) {
+                    showNotification("Silakan pilih barang terlebih dahulu!", "⚠️", "warning");
+                    this.classList.add('shake-animation');
+                    setTimeout(() => {
+                        this.classList.remove('shake-animation');
+                    }, 800);
+                    return;
+                }
+                
+                // Simulasi pengajuan
+                loanCount += 1;
+                totalLoans += 1;
+                updateStatistics();
+                
+                // Tampilkan notifikasi sukses
+                const itemNames = selectedItems.map(item => item.name).join(", ");
+                showNotification(
+                    `Peminjaman untuk ${selectedItems.length} barang berhasil diajukan! Hubungi Pak Semin di +62 812-2509-7240 untuk konfirmasi.`,
+                    "✅", 
+                    "success"
+                );
+                
+                // Efek konfeti
+                createConfettiEffect(this);
+                
+                // Update progress steps
+                stepCircles[2].classList.add('active'); // Step 3: Ajukan
+                
+                // Reset daftar
+                selectedItems = [];
+                updateLoanList();
+                
+                // Reset seleksi item
+                document.querySelectorAll('.item-card.selected').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Efek visual pada tombol
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Tombol hapus semua
+            clearListBtn.addEventListener('click', function() {
+                if (selectedItems.length === 0) {
+                    showNotification("Daftar pinjaman sudah kosong!", "ℹ️", "info");
+                    return;
+                }
+                
+                // Kembalikan semua stok
+                selectedItems.forEach(selectedItem => {
+                    const item = items.find(item => item.id === selectedItem.id);
+                    if (item) {
+                        item.stock += 1;
+                        updateItemStockDisplay(item.id);
+                    }
+                });
+                
+                // Reset daftar
+                selectedItems = [];
+                updateLoanList();
+                updateAvailableItemsCount();
+                
+                // Reset seleksi item
+                document.querySelectorAll('.item-card.selected').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                showNotification("Semua barang dihapus dari daftar pinjaman", "🗑️", "warning");
+                
+                // Reset progress steps
+                updateProgressSteps();
+                
+                // Efek visual pada tombol
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Tombol tutorial
+            tutorialBtn.addEventListener('click', function() {
+                tutorialModal.style.display = 'flex';
+                
+                // Efek visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Tutup modal
+            closeModal.addEventListener('click', function() {
+                tutorialModal.style.display = 'none';
+            });
+            
+            // Tutup modal saat klik di luar konten
+            tutorialModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+            
+            // Tombol WhatsApp
+            whatsappBtn.addEventListener('click', function() {
+                const phoneNumber = "6281225097240";
+                const message = `Halo Pak Semin, saya ingin meminjam barang dari SMA Negeri 1 Tarakan. Berikut barang yang saya pinjam: ${selectedItems.map(item => item.name).join(', ')}. Terima kasih.`;
+                const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+                
+                // Update progress steps
+                stepCircles[3].classList.add('active'); // Step 4: Konfirmasi
+                
+                showNotification("Membuka WhatsApp untuk menghubungi Pak Semin...", "💬", "info");
+                
+                // Efek visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Tombol SMS
+            smsBtn.addEventListener('click', function() {
+                const phoneNumber = "6281225097240";
+                const message = `Peminjaman barang SMA Negeri 1 Tarakan: ${selectedItems.map(item => item.name).join(', ')}.`;
+                const url = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+                
+                // Update progress steps
+                stepCircles[3].classList.add('active'); // Step 4: Konfirmasi
+                
+                showNotification("Membuka aplikasi pesan untuk SMS ke Pak Semin...", "📱", "info");
+                
+                // Efek visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Live chat
+            liveChat.addEventListener('click', function() {
+                whatsappBtn.click();
+                
+                // Efek visual
+                this.classList.add('bounce-animation');
+                setTimeout(() => {
+                    this.classList.remove('bounce-animation');
+                }, 1000);
+            });
+            
+            // Kotak pembuat - Terima kasih
+            thankCreatorBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                feedbackModal.style.display = 'flex';
+                
+                // Efek visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Kotak pembuat - Hubungi
+            contactCreatorBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const phoneNumber = "6282155350053";
+                const message = "Halo Aulia, terima kasih telah membuat website peminjaman barang SMA Negeri 1 Tarakan. Website ini sangat membantu!";
+                const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+                
+                showNotification("Membuka WhatsApp untuk menghubungi pembuat website...", "👩‍💻", "info");
+                
+                // Efek visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Kotak pembuat utama
+            creatorCard.addEventListener('click', function() {
+                // Tampilkan notifikasi dengan info pembuat
+                showNotification(
+                    "Aplikasi ini dibuat oleh Aulia Salsabila Dikpa Cahyadi (XII-I) - Hubungi: +62 821-5535-0053",
+                    "👩‍💻", 
+                    "info"
+                );
+                
+                // Efek visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+            
+            // Kirim feedback
+            sendFeedbackBtn.addEventListener('click', function() {
+                const message = feedbackMessage.value.trim();
+                if (message) {
+                    const phoneNumber = "6282155350053";
+                    const fullMessage = `Pesan dari pengguna website peminjaman barang SMA Negeri 1 Tarakan: ${message}`;
+                    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(fullMessage)}`;
+                    window.open(url, '_blank');
+                    
+                    showNotification("Pesan terima kasih berhasil dikirim ke pembuat website!", "❤️", "success");
+                    feedbackModal.style.display = 'none';
+                    feedbackMessage.value = '';
+                } else {
+                    showNotification("Silakan tulis pesan terima kasih terlebih dahulu!", "⚠️", "warning");
+                }
+            });
+            
+            // Batal feedback
+            cancelFeedbackBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'none';
+                feedbackMessage.value = '';
+            });
+            
+            // Tutup feedback modal saat klik di luar
+            feedbackModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                    feedbackMessage.value = '';
+                }
+            });
+            
+            // Klik di mana saja untuk menutup notifikasi
+            document.addEventListener('click', function(e) {
+                if (!notification.contains(e.target) && notification.classList.contains('show')) {
+                    hideNotification();
+                }
+            });
+            
+            // Efek saat scroll
+            window.addEventListener('scroll', function() {
+                // Efek parallax pada gelembung
+                bubbleElements.forEach(bubble => {
+                    const scrollY = window.scrollY;
+                    const speed = 0.3;
+                    bubble.style.transform = `translateY(${scrollY * speed}px)`;
+                });
+            });
+        }
+        
+        // Efek konfeti
+        function createConfettiEffect(element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const confettiCount = 60;
+            const confettiIcons = ["🎉", "🎊", "✨", "🌟", "⭐", "💫", "🎈", "🎁", "🥳", "👏"];
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '30px';
+                confetti.style.height = '30px';
+                confetti.style.fontSize = '1.5rem';
+                confetti.style.textAlign = 'center';
+                confetti.style.lineHeight = '30px';
+                confetti.style.left = `${centerX}px`;
+                confetti.style.top = `${centerY}px`;
+                confetti.style.zIndex = '1000';
+                confetti.style.pointerEvents = 'none';
+                confetti.textContent = confettiIcons[Math.floor(Math.random() * confettiIcons.length)];
+                
+                document.body.appendChild(confetti);
+                
+                // Animasi konfeti
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 200 + 100;
+                const duration = Math.random() * 1500 + 1000;
+                const rotation = Math.random() * 720 - 360;
+                
+                confetti.animate([
+                    { 
+                        transform: 'translate(0, 0) scale(1) rotate(0deg)', 
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0) rotate(${rotation}deg)`, 
+                        opacity: 0 
+                    }
+                ], {
+                    duration: duration,
+                    easing: 'ease-out'
+                }).onfinish = () => {
+                    confetti.remove();
+                };
+            }
+        }
+        
+        // Tampilkan notifikasi
+        function showNotification(message, icon, type) {
+            notificationMessage.textContent = message;
+            notificationIcon.textContent = icon;
+            
+            // Atur warna berdasarkan tipe
+            if (type === "success") {
+                notification.style.background = "linear-gradient(135deg, #4CAF50, #2E7D32)";
+            } else if (type === "warning") {
+                notification.style.background = "linear-gradient(135deg, #FF9800, #EF6C00)";
+            } else if (type === "info") {
+                notification.style.background = "linear-gradient(135deg, #2196F3, #0D47A1)";
+            }
+            
+            notification.classList.add('show');
+            
+            // Sembunyikan otomatis setelah 5 detik
+            setTimeout(() => {
+                hideNotification();
+            }, 5000);
+        }
+        
+        // Sembunyikan notifikasi
+        function hideNotification() {
+            notification.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
